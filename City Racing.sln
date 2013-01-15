@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "City Racing", "City Racing\City Racing.csproj", "{5ACA68E6-EC16-4DD7-894F-3313B4611437}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5ACA68E6-EC16-4DD7-894F-3313B4611437}.Debug|x86.ActiveCfg = Debug|x86
+		{5ACA68E6-EC16-4DD7-894F-3313B4611437}.Debug|x86.Build.0 = Debug|x86
+		{5ACA68E6-EC16-4DD7-894F-3313B4611437}.Release|x86.ActiveCfg = Release|x86
+		{5ACA68E6-EC16-4DD7-894F-3313B4611437}.Release|x86.Build.0 = Release|x86
+		{27ACFBCC-B6D6-4817-814A-A816D2869EB5}.Debug|x86.ActiveCfg = Debug|x86
+		{27ACFBCC-B6D6-4817-814A-A816D2869EB5}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
