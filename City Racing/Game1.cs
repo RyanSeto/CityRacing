@@ -15,6 +15,9 @@ namespace City_Racing
 {
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        const float BACK_VELOCITY = 0.012f; // 0.012f (previous values)
+        const int BACK_FORCE = 15; // 15 (previous values)
+
         enum CollisionType { Building, Vehicle, None };
         GraphicsDeviceManager graphics;
         GraphicsDevice device;
@@ -32,7 +35,7 @@ namespace City_Racing
         RaceEnd raceEnd;
         AI[] AIs;
    //     Map map;
-        Texture2D streetTexture, buildingTex1, buildingTex2, buildingTex3, buildingTex4, buildingTex5, buildingTex6, roofTex1, mapTex, yellowSq, redSq, lamTex, ferTex, retTex;// combBuildTex;
+        Texture2D streetTexture, buildingTex1, buildingTex2, buildingTex3, buildingTex4, buildingTex5, buildingTex6, roofTex1, mapTex, yellowSq, redSq, lamTex, ferTex, retTex, winTex;// combBuildTex;
 
         VertexBuffer texVertexBuffer;
         VertexBuffer[] buildingVertexBuffer;
@@ -49,6 +52,8 @@ namespace City_Racing
 
         SpriteBatch spriteBatch;
 
+        Boolean gameOver = false;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -64,7 +69,6 @@ namespace City_Racing
             Window.Title = "City Racing";
 
             lightDirection.Normalize();
-
 
             base.Initialize();
         }
@@ -91,14 +95,15 @@ namespace City_Racing
             yellowSq = Content.Load<Texture2D>("yellowSquare");
             redSq = Content.Load<Texture2D>("redSquare");
             streetTexture = Content.Load<Texture2D>("streetTex");
+            winTex = Content.Load<Texture2D>("winnerScreen");
 
             Quaternion rotation = Quaternion.Identity;
             rotation = rotation * Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), -MathHelper.Pi);
           
             playerVehicle = new Vehicle(lamModel, lamTex, new Vector3(1.5f, 0.04f, -2.5f), rotation, 0.0002f, 0.001f, 0.012f, 0.1f);
             AIs = new AI[2];
-            AIs[0] = new AI(new Vehicle(lamModel, ferTex, new Vector3(1.1f, 0.04f, -3.0f), rotation, 0.00017f, 0.001f, 0.0065f, 0.076f), 0);
-            AIs[1] = new AI(new Vehicle(lamModel, retTex, new Vector3(1.1f, 0.04f, -2.5f), rotation, 0.000165f, 0.001f, 0.0065f, 0.076f), 0);
+            AIs[0] = new AI(new Vehicle(lamModel, ferTex, new Vector3(1.1f, 0.04f, -3.0f), rotation, 0.00017f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 3);
+            AIs[1] = new AI(new Vehicle(lamModel, retTex, new Vector3(1.1f, 0.04f, -2.5f), rotation, 0.000165f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 7);
 
             buildingVertexBuffer = new VertexBuffer[6];
             buildingVertexDeclaration = new VertexDeclaration[6];
@@ -170,8 +175,6 @@ namespace City_Racing
      //               verticesList.Add(new VertexPositionNormalTexture(new Vector3(x + 1, buildingHeights[currentbuilding], -z), new Vector3(0, 1, 0), new Vector2((currentbuilding * 2 + 1) / imagesInTexture, 1)));
                 }
             }
-
-            
 
             texVertexBuffer = new VertexBuffer(device, verticesList.Count * VertexPositionNormalTexture.SizeInBytes, BufferUsage.WriteOnly);
 
@@ -343,8 +346,8 @@ namespace City_Racing
                 {
                     if (aiBoundingBoxes[i].Contains(box) != ContainmentType.Disjoint)
                     {
-                        AIs[i].GetVehicle().SetVelocity(0.012f);
-                        AIs[i].GetVehicle().SetTempBackForce(15);
+                        AIs[i].GetVehicle().SetVelocity(BACK_VELOCITY);
+                        AIs[i].GetVehicle().SetTempBackForce(BACK_FORCE);
                         AIs[i].GetVehicle().MoveOpp(playerVehicle.GetRotation());
 
                      /*  if (CheckCollision(i + 1, aiBoundingBoxes[i]) == CollisionType.Building)
@@ -362,8 +365,8 @@ namespace City_Racing
             {
                 if (playerBoundingBox.Contains(box) != ContainmentType.Disjoint)
                 {
-                    playerVehicle.SetVelocity(0.012f);
-                    playerVehicle.SetTempBackForce(15);
+                    playerVehicle.SetVelocity(BACK_VELOCITY);
+                    playerVehicle.SetTempBackForce(BACK_FORCE);
                     playerVehicle.MoveOpp(playerVehicle.GetRotation());
                     return CollisionType.Vehicle;
                 }
@@ -374,8 +377,8 @@ namespace City_Racing
                     {
                         if (aiBoundingBoxes[i].Contains(box) != ContainmentType.Disjoint)
                         {
-                            AIs[i].GetVehicle().SetVelocity(0.012f);
-                            AIs[i].GetVehicle().SetTempBackForce(15);
+                            AIs[i].GetVehicle().SetVelocity(BACK_VELOCITY);
+                            AIs[i].GetVehicle().SetTempBackForce(BACK_FORCE);
                             AIs[i].GetVehicle().MoveOpp(playerVehicle.GetRotation());
                             return CollisionType.Vehicle;
                         }
@@ -396,20 +399,20 @@ namespace City_Racing
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            CheckInput();
-
-       /*     for (int i = 0; i < AIs.Length; i++)
+            if (!gameOver)
             {
-                AIs[i].DecideAction(raceEnd, buildings, gameTime);
-            }  */
+                CheckInput();
 
-            AIs[0].DecideAction(raceEnd, buildings, gameTime);
+                for (int i = 0; i < AIs.Length; i++)
+                {
+                    AIs[i].DecideAction(raceEnd, buildings, gameTime);
+                }
 
-            Move();
-            UpdateBoundingBoxes();
-            UpdateCamera();
-            CheckVictor();
-            
+                Move();
+                UpdateBoundingBoxes();
+                UpdateCamera();
+                CheckVictor();
+            }
   //          map.SetUpMap(playerVehicle.GetPosition(), device);
 
             base.Update(gameTime);
@@ -558,6 +561,7 @@ namespace City_Racing
             if (playerVehicle.GetPosition().X >= raceEnd.GetPosition().X && playerVehicle.GetPosition().X <= raceEnd.GetPosition().X + 1 && -playerVehicle.GetPosition().Z >= raceEnd.GetPosition().Z && -playerVehicle.GetPosition().Z <= raceEnd.GetPosition().Z + 1)
             {
                 playerVehicle.SetRotation(new Quaternion(5, 5, 5, 5));
+                gameOver = true;
             }
         }
 
@@ -590,18 +594,28 @@ namespace City_Racing
             GraphicsDevice.SamplerStates[0].AddressU = TextureAddressMode.Wrap;
             GraphicsDevice.SamplerStates[0].AddressV = TextureAddressMode.Wrap;
 
-            DrawStreets();
-            DrawBuildings();
-            DrawModel(playerVehicle);
-
-            for (int i = 0; i < AIs.Length; i++)
+            if (!gameOver)
             {
-                DrawModel(AIs[i].GetVehicle());
+                DrawStreets();
+                DrawBuildings();
+                DrawModel(playerVehicle);
+
+                for (int i = 0; i < AIs.Length; i++)
+                {
+                    DrawModel(AIs[i].GetVehicle());
+                }
+
+                spriteBatch.Begin();
+                DrawMap();
+                spriteBatch.End();
             }
 
-            spriteBatch.Begin();
-            DrawMap();
-            spriteBatch.End();
+            else
+            {
+                spriteBatch.Begin();
+                DrawEndScreen();
+                spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
@@ -769,6 +783,12 @@ namespace City_Racing
      //       Console.WriteLine(xPos.ToString());
             spriteBatch.Draw(yellowSq, rect2, Color.White);
             spriteBatch.Draw(redSq, raceEnd.GetMapLoc(), Color.White);
+        }
+
+        private void DrawEndScreen()
+        {
+            Rectangle rect = new Rectangle(0, 0, screenWidth, screenHeight);
+            spriteBatch.Draw(winTex, rect, Color.White);
         }
     }
 }

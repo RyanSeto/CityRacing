@@ -25,12 +25,12 @@ namespace City_Racing
         Boolean interDone, prevXZ;
         int prevInterX, prevInterZ;
 
-        public AI(Vehicle vehicle, int theLevel)
+        public AI(Vehicle vehicle, int theLevel, int randomSeed)
         {
             this.vehicle = vehicle;
             level = theLevel;
 
-            rand = new Random();
+            rand = new Random(randomSeed);
 
             IsTurning = false;
             dir = "NORTH";
@@ -264,7 +264,7 @@ namespace City_Racing
                                 IsTurning = true;
                                 turnStartTime = gameTime;
                                 vehicle.Turn(turnDir);
-                                    vehicle.Coast();
+                                vehicle.Coast();
                             }
                         }
 
