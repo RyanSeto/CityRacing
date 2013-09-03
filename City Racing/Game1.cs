@@ -39,8 +39,10 @@ namespace City_Racing
 
         VertexBuffer texVertexBuffer;
         VertexBuffer[] buildingVertexBuffer;
+        VertexBuffer endLocationVertexBuffer;
         VertexDeclaration texVertexDeclaration;
         VertexDeclaration[] buildingVertexDeclaration;
+        VertexDeclaration endLocationVertexDeclaration;
         Random rand;
 
         int screenWidth, screenHeight;
@@ -118,6 +120,7 @@ namespace City_Racing
             screenHeight = device.PresentationParameters.BackBufferHeight;
 
             GenerateRaceEndLocation();
+            SetUpEndLocationVertices(raceEnd.getX(), raceEnd.getY());
             SetUpBoundingBoxes();
             UpdateBoundingBoxes();
 
@@ -287,6 +290,24 @@ namespace City_Racing
                 buildingVertexBuffer[h].SetData<VertexPositionNormalTexture>(verticesList.ToArray());
                 buildingVertexDeclaration[h] = new VertexDeclaration(device, VertexPositionNormalTexture.VertexElements);
             }
+        }
+
+        private void SetUpEndLocationVertices(int x, int y)
+        {
+            List<VertexPositionNormalTexture> verticesList = new List<VertexPositionNormalTexture>();
+
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x - 0.25f, 0, -y - 1), new Vector3(0, 1, 0), new Vector2(0, 0)));
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x + 1 - 0.25f, 0, -y), new Vector3(0, 1, 0), new Vector2(1, 1)));
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x - 0.25f, 0, -y), new Vector3(0, 1, 0), new Vector2(0, 1)));
+
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x + 1 - 0.25f, 0, -y), new Vector3(0, 1, 0), new Vector2(1, 1)));
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x - 0.25f, 0, -y - 1), new Vector3(0, 1, 0), new Vector2(0, 0)));
+            verticesList.Add(new VertexPositionNormalTexture(new Vector3(x + 1 - 0.25f, 0, -y - 1), new Vector3(0, 1, 0), new Vector2(1, 0)));
+
+            endLocationVertexBuffer = new VertexBuffer(device, verticesList.Count * VertexPositionNormalTexture.SizeInBytes, BufferUsage.WriteOnly);
+
+            endLocationVertexBuffer.SetData<VertexPositionNormalTexture>(verticesList.ToArray());
+            endLocationVertexDeclaration = new VertexDeclaration(device, VertexPositionNormalTexture.VertexElements);
         }
 
         private void GenerateRaceEndLocation()
@@ -598,6 +619,7 @@ namespace City_Racing
             {
                 DrawStreets();
                 DrawBuildings();
+                DrawEndLocation();
                 DrawModel(playerVehicle);
 
                 for (int i = 0; i < AIs.Length; i++)
@@ -713,6 +735,26 @@ namespace City_Racing
                 }
                 effects.End();
             }
+        }
+
+        private void DrawEndLocation()
+        {
+            Matrix WorldMatrix = Matrix.CreateScale(1.25f, 1.25f, 1.25f);
+            effects.CurrentTechnique = effects.Techniques["Textured"];
+            effects.Parameters["World"].SetValue(WorldMatrix);
+            effects.Parameters["View"].SetValue(viewMatrix);
+            effects.Parameters["Projection"].SetValue(projectionMatrix);
+            effects.Parameters["xTexture"].SetValue(redSq);
+            effects.Begin();
+            foreach (EffectPass pass in effects.CurrentTechnique.Passes)
+            {
+                pass.Begin();
+                device.VertexDeclaration = endLocationVertexDeclaration;
+                device.Vertices[0].SetSource(endLocationVertexBuffer, 0, VertexPositionNormalTexture.SizeInBytes);
+                device.DrawPrimitives(PrimitiveType.TriangleList, 0, endLocationVertexBuffer.SizeInBytes / VertexPositionNormalTexture.SizeInBytes / 3);
+                pass.End();
+            }
+            effects.End();
         }
 
         private void DrawModel(Vehicle vehicle)

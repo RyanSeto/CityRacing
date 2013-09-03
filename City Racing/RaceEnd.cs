@@ -20,10 +20,14 @@ namespace City_Racing
         public Vector3 ThreeDPosition;
         public Rectangle MapLoc;
         int screenHeight;
+        int x;
+        int y;
 
         public RaceEnd(Vector2 pos, int theScreenHeight)
         {
             Position = pos;
+            x = (int)pos.X;
+            y = (int)pos.Y;
             screenHeight = theScreenHeight;
             ThreeDPosition = new Vector3(pos.X * 1.25f, 0, pos.Y * 1.25f);
 
@@ -43,6 +47,15 @@ namespace City_Racing
             return ThreeDPosition;
         }
 
+        public int getX()
+        {
+            return x;
+        }
+
+        public int getY()
+        {
+            return y;
+        }
    //     public SetS
     }
 }
