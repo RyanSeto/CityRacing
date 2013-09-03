@@ -35,7 +35,7 @@ namespace City_Racing
         RaceEnd raceEnd;
         AI[] AIs;
    //     Map map;
-        Texture2D streetTexture, buildingTex1, buildingTex2, buildingTex3, buildingTex4, buildingTex5, buildingTex6, roofTex1, mapTex, yellowSq, redSq, lamTex, ferTex, retTex, winTex;// combBuildTex;
+        Texture2D streetTexture, buildingTex1, buildingTex2, buildingTex3, buildingTex4, buildingTex5, buildingTex6, roofTex1, mapTex, yellowSq, redSq, lamTex, ferTex, retTex, winTex, loseTex;// combBuildTex;
 
         VertexBuffer texVertexBuffer;
         VertexBuffer[] buildingVertexBuffer;
@@ -55,6 +55,7 @@ namespace City_Racing
         SpriteBatch spriteBatch;
 
         Boolean gameOver = false;
+        Boolean won = false;
 
         public Game1()
         {
@@ -98,14 +99,15 @@ namespace City_Racing
             redSq = Content.Load<Texture2D>("redSquare");
             streetTexture = Content.Load<Texture2D>("streetTex");
             winTex = Content.Load<Texture2D>("winnerScreen");
+            loseTex = Content.Load<Texture2D>("loserScreen");
 
             Quaternion rotation = Quaternion.Identity;
             rotation = rotation * Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), -MathHelper.Pi);
           
             playerVehicle = new Vehicle(lamModel, lamTex, new Vector3(1.5f, 0.04f, -2.5f), rotation, 0.0002f, 0.001f, 0.012f, 0.1f);
             AIs = new AI[2];
-            AIs[0] = new AI(new Vehicle(lamModel, ferTex, new Vector3(1.1f, 0.04f, -3.0f), rotation, 0.00017f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 3);
-            AIs[1] = new AI(new Vehicle(lamModel, retTex, new Vector3(1.1f, 0.04f, -2.5f), rotation, 0.000165f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 7);
+            AIs[0] = new AI(new Vehicle(lamModel, ferTex, new Vector3(1.25f, 0.04f, -3.0f), rotation, 0.00017f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 3);
+            AIs[1] = new AI(new Vehicle(lamModel, retTex, new Vector3(1.25f, 0.04f, -2.5f), rotation, 0.000165f, 0.001f, 0.0065f, 0.076f), 0, DateTime.Now.Second % 7);
 
             buildingVertexBuffer = new VertexBuffer[6];
             buildingVertexDeclaration = new VertexDeclaration[6];
@@ -581,8 +583,20 @@ namespace City_Racing
         {
             if (playerVehicle.GetPosition().X >= raceEnd.GetPosition().X && playerVehicle.GetPosition().X <= raceEnd.GetPosition().X + 1 && -playerVehicle.GetPosition().Z >= raceEnd.GetPosition().Z && -playerVehicle.GetPosition().Z <= raceEnd.GetPosition().Z + 1)
             {
-                playerVehicle.SetRotation(new Quaternion(5, 5, 5, 5));
+                //playerVehicle.SetRotation(new Quaternion(5, 5, 5, 5));
                 gameOver = true;
+                won = true;
+                return;
+            }
+
+            for (int i = 0; i < AIs.Length; i++)
+            {
+                if (AIs[i].vehicle.GetPosition().X >= raceEnd.GetPosition().X && AIs[i].vehicle.GetPosition().X <= raceEnd.GetPosition().X + 1 && -AIs[i].vehicle.GetPosition().Z >= raceEnd.GetPosition().Z && -AIs[i].vehicle.GetPosition().Z <= raceEnd.GetPosition().Z + 1)
+                {
+                    gameOver = true;
+                    won = false;
+                    return;
+                }
             }
         }
 
@@ -830,7 +844,15 @@ namespace City_Racing
         private void DrawEndScreen()
         {
             Rectangle rect = new Rectangle(0, 0, screenWidth, screenHeight);
-            spriteBatch.Draw(winTex, rect, Color.White);
+            if (won)
+            {
+                spriteBatch.Draw(winTex, rect, Color.White);
+            }
+
+            else
+            {
+                spriteBatch.Draw(loseTex, rect, Color.White);
+            }
         }
     }
 }
