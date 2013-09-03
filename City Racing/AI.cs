@@ -475,6 +475,8 @@ namespace City_Racing
             return false;
         }
 
+        // NOTE: THERE IS A BUG HERE. If the AI gets close to the border, the game thinks it is in the border tile and checks outside of the map
+        // crashing the game with an out of bounds error. This may be a problem with the bounding boxes of the AIs, or everything in the game.
         public String InIntersection(double xCoord, double zCoord, Building[,] buildings, string dir, RaceEnd raceEnd)
         {
             int x = (int)xCoord;
@@ -506,6 +508,7 @@ namespace City_Racing
                            return "RIGHT";
                        } */
 
+                // Out of bounds error can happen here
                 if (!buildings[x, z + 1].exists())
                 {
                     canGo[0] = true;
