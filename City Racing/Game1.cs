@@ -31,7 +31,7 @@ namespace City_Racing
 
         Vehicle playerVehicle;
         Building[,] buildings;
-        SeparateMethods sMethods;
+        BuildingCreator buildingCreator;
         RaceEnd raceEnd;
         AI[] AIs;
    //     Map map;
@@ -80,7 +80,7 @@ namespace City_Racing
         {
             device = graphics.GraphicsDevice;
             rand = new Random();
-            sMethods = new SeparateMethods();
+            buildingCreator = new BuildingCreator();
             effects = Content.Load<Effect>("Effects");
             lamModel = LoadModel("Lamborghini");
             lamTex = Content.Load<Texture2D>("Lamburghini");
@@ -112,7 +112,7 @@ namespace City_Racing
             buildingVertexBuffer = new VertexBuffer[6];
             buildingVertexDeclaration = new VertexDeclaration[6];
             SetUpVertices();
-            buildings = sMethods.CreateBuildings();
+            buildings = buildingCreator.CreateBuildings();
             SetUpBuildings();
 
     //        map = new Map();

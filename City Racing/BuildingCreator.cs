@@ -5,15 +5,14 @@ using System.Text;
 
 namespace City_Racing
 {
-    class SeparateMethods
+    class BuildingCreator
     {
         Random rand;
         Building[,] buildings;
 
-        public SeparateMethods()
+        public BuildingCreator()
         {
             rand = new Random();
-            // = new Building[100, 100];
         }
 
         public Building[,] CreateBuildings()
@@ -392,7 +391,6 @@ namespace City_Racing
         {
             int type = rand.Next(1, 7);
             int height = type;
-       //     Texture2D tex = buildingTex1;
             buildings[i, j] = new Building(height, true);
         }
     }
